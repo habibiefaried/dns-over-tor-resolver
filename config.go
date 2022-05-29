@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+
+	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
 	"github.com/spf13/viper"
 )
 
@@ -28,4 +31,40 @@ func readConfig() (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func applyConfig() []resolvehandler.ResolveHandler {
+	upstreams := []resolvehandler.ResolveHandler{}
+	var err error
+	c, err := readConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	// ** INIT ALL UPSTREAMS HERE **
+	// 1. Local
+	upstreamLocal := resolvehandler.MemoryResolve{
+		Name:    "Manual",
+		Records: c.Manual,
+	}
+	upstreamLocal.Init()
+	defer upstreamLocal.Close()
+	upstreams = append(upstreams, &upstreamLocal)
+
+	// 2. TOR
+	if (c.Tor.Address != "") && (c.Tor.Port != "") {
+		upstreamTOR := resolvehandler.TorResolve{
+			OnionDNSServer: c.Tor.Address + ":" + c.Tor.Port,
+			Name:           "TOR Network",
+		}
+		err = upstreamTOR.Init()
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			upstreams = append(upstreams, &upstreamTOR)
+		}
+		defer upstreamTOR.Close()
+	}
+
+	return upstreams
 }
