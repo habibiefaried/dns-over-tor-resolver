@@ -14,3 +14,9 @@ docker build . -t dnsserv
 ```
 docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv -dit -p 53:5353/udp dnsserv
 ```
+
+Or just use generated one
+
+```
+docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv -dit -p 53:5353/udp habibiefaried/dns-over-tor-resolver
+```
