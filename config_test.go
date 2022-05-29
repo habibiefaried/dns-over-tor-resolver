@@ -12,6 +12,6 @@ func TestReadConfig(t *testing.T) {
 		t.Fatal(err)
 	} else {
 		assert.Equal(t, c.Tor.Port, "53", "The two words should be the same.")
-		assert.Equal(t, c.Manual[2]["pure.privatedomain"], "127.1.5.6", "The two words should be the same.")
+		assert.Equal(t, c.Manual["pure.privatedomain."], "127.1.5.6", "The two words should be the same.")
 	}
 }

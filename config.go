@@ -10,8 +10,8 @@ type TorConfig struct {
 }
 
 type Config struct {
-	Tor    TorConfig           `mapstructure:"tor"`
-	Manual []map[string]string `mapstructure:"manual"`
+	Tor    TorConfig         `mapstructure:"tor"`
+	Manual map[string]string `mapstructure:"manual"`
 }
 
 func readConfig() (*Config, error) {
