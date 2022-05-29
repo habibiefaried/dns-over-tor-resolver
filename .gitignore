@@ -15,3 +15,4 @@
 # vendor/
 data-dir*
 dns-over-tor-resolver
+*.sqlite

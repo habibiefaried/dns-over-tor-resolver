@@ -3,6 +3,7 @@ module github.com/habibiefaried/dns-over-tor-resolver
 go 1.18
 
 require (
+	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/miekg/dns v1.1.49
 	github.com/stretchr/testify v1.7.1
 )
@@ -30,6 +31,7 @@ require (
 
 require (
 	github.com/cretz/bine v0.2.0
+	github.com/mattn/go-sqlite3 v1.14.13
 	github.com/spf13/viper v1.12.0
 	golang.org/x/mod v0.4.2 // indirect
 	golang.org/x/net v0.0.0-20220520000938-2e3eb7b945c2 // indirect
