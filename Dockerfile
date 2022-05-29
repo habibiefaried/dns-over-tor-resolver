@@ -8,6 +8,7 @@ FROM alpine:3.16.0
 
 WORKDIR /app
 COPY --from=builder /app/main .
+COPY config.yml /app/config.yml 
 RUN apk add --no-cache tor
 ENTRYPOINT [ "/bin/sh" ]
 CMD [ "-c", "/app/main" ]

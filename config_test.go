@@ -1,0 +1,17 @@
+package main
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestReadConfig(t *testing.T) {
+	c, err := readConfig()
+	if err != nil {
+		t.Fatal(err)
+	} else {
+		assert.Equal(t, c.Tor.Port, "53", "The two words should be the same.")
+		assert.Equal(t, c.Manual[2]["pure.privatedomain"], "127.1.5.6", "The two words should be the same.")
+	}
+}
