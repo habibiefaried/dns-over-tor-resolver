@@ -3,11 +3,12 @@ package resolvehandler
 import (
 	"testing"
 
+	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	dotdns "github.com/ncruces/go-dns"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDOT(t *testing.T) {
-
 	dts := []DoTResolve{
 		{
 			ServerHosts: "cloudflare-dns.com",
@@ -39,5 +40,32 @@ func TestDOT(t *testing.T) {
 		_, err = v.Resolve("nonexistenthosts.pvt")
 		t.Log(err)
 	}
+}
 
+func TestSQLiteResolve(t *testing.T) {
+	sq := cachehandler.SqliteHandler{
+		FileName: "testingcache.sqlite",
+	}
+
+	err := sq.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sq.Close()
+
+	err = sq.Put("google.com.", "8.8.8.8", "testing")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	sqresolv := SqliteCacheResolve{
+		SQLiteHandler: sq,
+	}
+
+	rr, err := sqresolv.Resolve("google.com.")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	assert.Equal(t, "google.com.	3600	IN	A	8.8.8.8", rr.String())
 }

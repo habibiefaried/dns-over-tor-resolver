@@ -8,12 +8,14 @@ import (
 	"time"
 
 	"github.com/cretz/bine/tor"
+	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	"github.com/miekg/dns"
 )
 
 type TorResolve struct {
 	OnionDNSServer string
 	Name           string
+	DNSCache       []cachehandler.CacheHandler // to support cache
 	intlresolve    *net.Resolver
 	dialCancel     context.CancelFunc
 	conn           net.Conn
@@ -55,11 +57,20 @@ func (tr *TorResolve) Init() error {
 }
 
 func (tr *TorResolve) Resolve(q string) (dns.RR, error) {
-	ip, err := tr.intlresolve.LookupHost(context.Background(), q)
+	ips, err := tr.intlresolve.LookupHost(context.Background(), q)
 	if err != nil {
 		return nil, err
 	} else {
-		return dns.NewRR(fmt.Sprintf("%s A %s", q, ip[0]))
+		for _, v := range tr.DNSCache {
+			for _, ip := range ips {
+				err := v.Put(q, ip, "TOR")
+				if err != nil {
+					fmt.Printf("Error while putting on cache %v\n", err)
+				}
+			}
+		}
+
+		return dns.NewRR(fmt.Sprintf("%s A %s", q, ips[0]))
 	}
 }
 
