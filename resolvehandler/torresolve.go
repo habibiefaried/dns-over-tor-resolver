@@ -80,6 +80,7 @@ func (tr *TorResolve) GetName() string {
 
 // Close function is a function to close any open connections/processes to upstream
 func (tr *TorResolve) Close() error {
+	fmt.Println("TOR resolver is closing...")
 	err := tr.conn.Close()
 	if err != nil {
 		return err

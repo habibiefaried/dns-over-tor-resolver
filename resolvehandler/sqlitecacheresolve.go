@@ -28,5 +28,6 @@ func (s *SqliteCacheResolve) GetName() string {
 }
 
 func (s *SqliteCacheResolve) Close() error {
+	fmt.Println("SQLite-cache is closing...")
 	return nil
 }

@@ -49,5 +49,6 @@ func (dt *DoTResolve) GetName() string {
 }
 
 func (dt *DoTResolve) Close() error {
+	fmt.Println("DOT resolver is closing...")
 	return nil
 }

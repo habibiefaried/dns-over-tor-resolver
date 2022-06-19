@@ -29,5 +29,6 @@ func (m *MemoryResolve) Resolve(q string) (dns.RR, error) {
 }
 
 func (m *MemoryResolve) Close() error {
+	fmt.Println("Memory resolve is closing...")
 	return nil
 }

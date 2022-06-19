@@ -53,12 +53,10 @@ func getTORResolver() *resolvehandler.TorResolve {
 			}
 			err = upstreamTOR.Init()
 			if err != nil && trial >= maxTries {
-				upstreamTOR.Close()
 				log.Fatalf("error initializing tor network after %v tries: %v", maxTries, err)
 			} else if err != nil {
 				trial++
 				log.Printf("trial num %v, got error: %v\n", trial, err)
-				upstreamTOR.Close()
 			} else {
 				return &upstreamTOR
 			}
@@ -82,7 +80,6 @@ func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
 		Records: c.Manual,
 	}
 	upstreamLocal.Init()
-	defer upstreamLocal.Close()
 	upstreams["local"] = append(upstreams["local"], &upstreamLocal)
 
 	// 2. DoT, hardcoded address for now
@@ -106,7 +103,6 @@ func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
 		if err != nil {
 			fmt.Printf("Error while initializing DOT %v: %v\n", v.ServerHosts, err)
 		} else {
-			defer v.Close()
 			upstreams["fallback"] = append(upstreams["fallback"], &v)
 		}
 	}
