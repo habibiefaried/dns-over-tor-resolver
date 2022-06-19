@@ -24,6 +24,11 @@ func TestDOT(t *testing.T) {
 	}
 
 	for _, v := range dts {
+		err := v.Init()
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		res, err := v.Resolve("puredns.org")
 		if err != nil {
 			t.Fatal(err)

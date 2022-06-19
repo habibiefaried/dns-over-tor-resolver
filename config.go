@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
+	dotdns "github.com/ncruces/go-dns"
 	"github.com/spf13/viper"
 )
 
@@ -73,7 +75,7 @@ func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
 		log.Fatal(err)
 	}
 
-	// ** INIT ALL UPSTREAMS HERE **
+	// ** INIT ALL UPSTREAMS (BESIDE TOR) HERE **
 	// 1. Local
 	upstreamLocal := resolvehandler.MemoryResolve{
 		Name:    "Manual",
@@ -83,5 +85,30 @@ func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
 	defer upstreamLocal.Close()
 	upstreams["local"] = append(upstreams["local"], &upstreamLocal)
 
+	// 2. DoT, hardcoded address for now
+	dts := []resolvehandler.DoTResolve{
+		{
+			ServerHosts: "cloudflare-dns.com",
+			ServerOpts: []dotdns.DoTOption{
+				dotdns.DoTAddresses("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001"),
+			},
+		},
+		{
+			ServerHosts: "dns.google",
+			ServerOpts: []dotdns.DoTOption{
+				dotdns.DoTAddresses("8.8.8.8", "8.8.4.4", "2001:4860:4860::8888", "2001:4860:4860::8844"),
+			},
+		},
+	}
+
+	for _, v := range dts {
+		err := v.Init()
+		if err != nil {
+			fmt.Printf("Error while initializing DOT %v: %v\n", v.ServerHosts, err)
+		} else {
+			defer v.Close()
+			upstreams["fallback"] = append(upstreams["fallback"], &v)
+		}
+	}
 	return upstreams
 }
