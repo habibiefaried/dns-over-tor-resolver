@@ -5,11 +5,12 @@ go 1.18
 require (
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/miekg/dns v1.1.49
+	github.com/ncruces/go-dns v1.1.0
 	github.com/stretchr/testify v1.7.1
 )
 
 require (
-	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/davecgh/go-spew v1.1.1
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/magiconair/properties v1.8.6 // indirect

@@ -33,25 +33,13 @@ func readConfig() (*Config, error) {
 	return &config, nil
 }
 
-func applyConfig() []resolvehandler.ResolveHandler {
-	upstreams := []resolvehandler.ResolveHandler{}
+func getTORResolver() *resolvehandler.TorResolve {
 	var err error
 	c, err := readConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// ** INIT ALL UPSTREAMS HERE **
-	// 1. Local
-	upstreamLocal := resolvehandler.MemoryResolve{
-		Name:    "Manual",
-		Records: c.Manual,
-	}
-	upstreamLocal.Init()
-	defer upstreamLocal.Close()
-	upstreams = append(upstreams, &upstreamLocal)
-
-	// 2. TOR
 	maxTries := 10
 
 	if (c.Tor.Address != "") && (c.Tor.Port != "") {
@@ -70,12 +58,30 @@ func applyConfig() []resolvehandler.ResolveHandler {
 				log.Printf("trial num %v, got error: %v\n", trial, err)
 				upstreamTOR.Close()
 			} else {
-				upstreams = append(upstreams, &upstreamTOR)
-				defer upstreamTOR.Close()
-				break
+				return &upstreamTOR
 			}
 		}
 	}
+	return nil
+}
+
+func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
+	upstreams := make(map[string][]resolvehandler.ResolveHandler)
+	var err error
+	c, err := readConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// ** INIT ALL UPSTREAMS HERE **
+	// 1. Local
+	upstreamLocal := resolvehandler.MemoryResolve{
+		Name:    "Manual",
+		Records: c.Manual,
+	}
+	upstreamLocal.Init()
+	defer upstreamLocal.Close()
+	upstreams["local"] = append(upstreams["local"], &upstreamLocal)
 
 	return upstreams
 }

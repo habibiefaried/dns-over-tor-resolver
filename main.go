@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	upstreams := applyConfig()
+	resolverbesidetor := getAllBesideTORResolver()
 
 	// attach request handler func
 	dns.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
@@ -23,8 +23,8 @@ func main() {
 				log.Printf("Query for %s\n", q.Name)
 				switch q.Qtype {
 				case dns.TypeA:
-					for _, u := range upstreams {
-						rr, err := u.Resolve(q.Name)
+					for _, u := range resolverbesidetor["local"] {
+						rr, err := u.Resolve(q.Name) // TODO: to support multiple answer
 						if err != nil {
 							fmt.Printf("[ERROR]   no answer from resolver '%v': %v\n", u.GetName(), err)
 						} else {

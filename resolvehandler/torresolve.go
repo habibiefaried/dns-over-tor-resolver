@@ -21,7 +21,7 @@ type TorResolve struct {
 
 func (tr *TorResolve) Init() error {
 	fmt.Println("Starting and registering onion service, please wait a couple of minutes...")
-	t, err := tor.Start(nil, &tor.StartConf{DataDir: "data-dir-tcp-to-tor", EnableNetwork: true, DebugWriter: nil})
+	t, err := tor.Start(context.TODO(), &tor.StartConf{DataDir: "data-dir-tcp-to-tor", EnableNetwork: true, DebugWriter: nil})
 	if err != nil {
 		return err
 	}
