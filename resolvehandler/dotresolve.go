@@ -41,7 +41,7 @@ func (dt *DoTResolve) Resolve(q string) (dns.RR, error) {
 		}
 	}
 
-	return dns.NewRR(fmt.Sprintf("%s A %s", q, ips[0].String())) // TODO: return multiple value
+	return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ips[0].String())) // TODO: return multiple value
 }
 
 func (dt *DoTResolve) GetName() string {

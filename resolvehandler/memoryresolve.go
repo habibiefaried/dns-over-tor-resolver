@@ -22,7 +22,7 @@ func (m *MemoryResolve) Init() error {
 
 func (m *MemoryResolve) Resolve(q string) (dns.RR, error) {
 	if val, ok := m.Records[q]; ok {
-		return dns.NewRR(fmt.Sprintf("%s A %s", q, val))
+		return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, val))
 	} else {
 		return nil, fmt.Errorf("query not found")
 	}

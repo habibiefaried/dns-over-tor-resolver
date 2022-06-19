@@ -70,7 +70,7 @@ func (tr *TorResolve) Resolve(q string) (dns.RR, error) {
 			}
 		}
 
-		return dns.NewRR(fmt.Sprintf("%s A %s", q, ips[0]))
+		return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ips[0]))
 	}
 }
 

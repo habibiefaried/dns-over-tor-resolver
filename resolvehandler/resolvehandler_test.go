@@ -67,5 +67,5 @@ func TestSQLiteResolve(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "google.com.	3600	IN	A	8.8.8.8", rr.String())
+	assert.Equal(t, "google.com.	60	IN	A	8.8.8.8", rr.String())
 }

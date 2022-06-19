@@ -50,6 +50,7 @@ flowchart TD
 
 ```
 2022/06/19 02:53:24 Query for puredns.rog.
+
 [ERROR]   no answer from local & cache resolver 'Manual': query not found
 [ERROR]   no answer from main TOR: lookup puredns.rog. on 192.168.1.1:53: no such host
 [ERROR]   no answer from fallback resolver 'DOT-dns.google': lookup puredns.rog. on 192.168.1.1:53: no such host
@@ -60,6 +61,7 @@ flowchart TD
 
 ```
 2022/06/19 02:44:22 Query for itb.ac.id.
+
 [ERROR]   no answer from local & cache resolver 'Manual': query not found
 [WARN] TOR is not initialized yet...
 [SUCCESS] got answer from fallback resolver 'DOT-dns.google'
@@ -69,8 +71,23 @@ flowchart TD
 
 ```
 2022/06/19 02:55:22 Query for puredns.org.
+
 [ERROR]   no answer from local & cache resolver 'Manual': query not found
 [SUCCESS] got answer from main TOR
+```
+
+4. When the query is got cached
+
+```
+2022/06/19 04:40:09 Query for itb.ac.id.
+[ERROR]   no answer from local & cache resolver 'SQLite-Cache': sql: no rows in result set
+[ERROR]   no answer from local & cache resolver 'Manual': query not found
+[WARN] TOR is not initialized yet...
+[SUCCESS] got answer from fallback resolver 'DOT-dns.google'
+
+2022/06/19 04:40:10 Query for itb.ac.id.
+[cache HIT] domain itb.ac.id. is found 167.205.59.96 from DOT-dns.google
+[SUCCESS] got answer from local & cache resolver 'SQLite-Cache'
 ```
 
 ### Feature

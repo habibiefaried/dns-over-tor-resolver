@@ -23,6 +23,7 @@ func main() {
 		m.SetReply(r)
 		m.Compress = false
 
+	OuterLoop:
 		switch r.Opcode {
 		case dns.OpcodeQuery:
 			for _, q := range m.Question {
@@ -36,7 +37,7 @@ func main() {
 						} else {
 							fmt.Printf("[SUCCESS] got answer from local & cache resolver '%v'\n", u.GetName())
 							m.Answer = append(m.Answer, rr)
-							break
+							break OuterLoop
 						}
 					}
 
@@ -48,7 +49,7 @@ func main() {
 						} else {
 							fmt.Printf("[SUCCESS] got answer from main TOR\n")
 							m.Answer = append(m.Answer, rr)
-							break
+							break OuterLoop
 						}
 					} else {
 						fmt.Println("[WARN] TOR is not initialized yet...")
@@ -61,7 +62,7 @@ func main() {
 						} else {
 							fmt.Printf("[SUCCESS] got answer from fallback resolver '%v'\n", u.GetName())
 							m.Answer = append(m.Answer, rr)
-							break
+							break OuterLoop
 						}
 					}
 				}

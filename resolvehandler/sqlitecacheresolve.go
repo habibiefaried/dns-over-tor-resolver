@@ -20,7 +20,7 @@ func (s *SqliteCacheResolve) Resolve(q string) (dns.RR, error) {
 	if err != nil {
 		return nil, err
 	}
-	return dns.NewRR(fmt.Sprintf("%s A %s", q, *ret))
+	return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, *ret))
 }
 
 func (s *SqliteCacheResolve) GetName() string {
