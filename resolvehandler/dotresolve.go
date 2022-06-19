@@ -34,7 +34,7 @@ func (dt *DoTResolve) Resolve(q string) (dns.RR, error) {
 
 	for _, v := range dt.DNSCache {
 		for _, ip := range ips {
-			err := v.Put(q, ip.String(), "DOT")
+			err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
 			if err != nil {
 				fmt.Printf("Error while putting on cache %v\n", err)
 			}

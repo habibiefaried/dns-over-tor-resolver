@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
 	dotdns "github.com/ncruces/go-dns"
 	"github.com/spf13/viper"
@@ -42,6 +43,15 @@ func getTORResolver() *resolvehandler.TorResolve {
 		log.Fatal(err)
 	}
 
+	// cache loading
+	sq := &cachehandler.SqliteHandler{
+		FileName: "dnscache.sqlite",
+	}
+	err = sq.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	maxTries := 10
 
 	if (c.Tor.Address != "") && (c.Tor.Port != "") {
@@ -50,6 +60,7 @@ func getTORResolver() *resolvehandler.TorResolve {
 			upstreamTOR := resolvehandler.TorResolve{
 				OnionDNSServer: c.Tor.Address + ":" + c.Tor.Port,
 				Name:           "TOR Network",
+				DNSCache:       []cachehandler.CacheHandler{sq},
 			}
 			err = upstreamTOR.Init()
 			if err != nil && trial >= maxTries {
@@ -73,8 +84,22 @@ func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
 		log.Fatal(err)
 	}
 
+	// cache loading
+	sq := &cachehandler.SqliteHandler{
+		FileName: "dnscache.sqlite",
+	}
+	err = sq.Init()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// ** INIT ALL UPSTREAMS (BESIDE TOR) HERE **
-	// 1. Local
+	// 1. Cache
+	upstreams["local"] = append(upstreams["local"], &resolvehandler.SqliteCacheResolve{
+		SQLiteHandler: sq,
+	})
+
+	// 2. Local
 	upstreamLocal := resolvehandler.MemoryResolve{
 		Name:    "Manual",
 		Records: c.Manual,
@@ -82,19 +107,21 @@ func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
 	upstreamLocal.Init()
 	upstreams["local"] = append(upstreams["local"], &upstreamLocal)
 
-	// 2. DoT, hardcoded address for now
+	// 3. DoT, hardcoded address for now
 	dts := []resolvehandler.DoTResolve{
 		{
 			ServerHosts: "cloudflare-dns.com",
 			ServerOpts: []dotdns.DoTOption{
 				dotdns.DoTAddresses("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001"),
 			},
+			DNSCache: []cachehandler.CacheHandler{sq},
 		},
 		{
 			ServerHosts: "dns.google",
 			ServerOpts: []dotdns.DoTOption{
 				dotdns.DoTAddresses("8.8.8.8", "8.8.4.4", "2001:4860:4860::8888", "2001:4860:4860::8844"),
 			},
+			DNSCache: []cachehandler.CacheHandler{sq},
 		},
 	}
 

@@ -43,7 +43,7 @@ func TestDOT(t *testing.T) {
 }
 
 func TestSQLiteResolve(t *testing.T) {
-	sq := cachehandler.SqliteHandler{
+	sq := &cachehandler.SqliteHandler{
 		FileName: "testingcache.sqlite",
 	}
 

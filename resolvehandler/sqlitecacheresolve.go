@@ -8,7 +8,7 @@ import (
 )
 
 type SqliteCacheResolve struct {
-	SQLiteHandler cachehandler.SqliteHandler
+	SQLiteHandler *cachehandler.SqliteHandler
 }
 
 func (s *SqliteCacheResolve) Init() error {
