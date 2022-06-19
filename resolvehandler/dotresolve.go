@@ -32,20 +32,16 @@ func (dt *DoTResolve) Resolve(q string) (dns.RR, error) {
 		return nil, err
 	}
 
-	for _, v := range dt.DNSCache {
-		for _, ip := range ips {
-			if net.ParseIP(ip.String()) != nil {
+	for _, ip := range ips {
+		if net.ParseIP(ip.String()) != nil {
+			for _, v := range dt.DNSCache {
 				err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
 				if err != nil {
 					fmt.Printf("Error while putting on cache %v\n", err)
 				}
 			}
-		}
-	}
 
-	for _, ip := range ips {
-		if net.ParseIP(ip.String()) != nil {
-			return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ips[0].String())) // TODO: return multiple value
+			return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip.String())) // TODO: return multiple value
 		}
 	}
 

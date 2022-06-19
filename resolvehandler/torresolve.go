@@ -61,20 +61,16 @@ func (tr *TorResolve) Resolve(q string) (dns.RR, error) {
 	if err != nil {
 		return nil, err
 	} else {
-		for _, v := range tr.DNSCache {
-			for _, ip := range ips {
-				if net.ParseIP(ip) != nil {
+		for _, ip := range ips {
+			if net.ParseIP(ip) != nil {
+				for _, v := range tr.DNSCache {
 					err := v.Put(q, ip, "TOR")
 					if err != nil {
 						fmt.Printf("Error while putting on cache %v\n", err)
 					}
 				}
-			}
-		}
 
-		for _, ip := range ips {
-			if net.ParseIP(ip) != nil {
-				return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip))
+				return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip)) // TODO: return multiple value
 			}
 		}
 
