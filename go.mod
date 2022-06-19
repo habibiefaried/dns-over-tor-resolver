@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/miekg/dns v1.1.49
+	github.com/ncruces/go-dns v1.1.0
 	github.com/stretchr/testify v1.7.1
 )
 

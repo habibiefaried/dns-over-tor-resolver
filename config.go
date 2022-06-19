@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
+	dotdns "github.com/ncruces/go-dns"
 	"github.com/spf13/viper"
 )
 
@@ -33,25 +35,13 @@ func readConfig() (*Config, error) {
 	return &config, nil
 }
 
-func applyConfig() []resolvehandler.ResolveHandler {
-	upstreams := []resolvehandler.ResolveHandler{}
+func getTORResolver() *resolvehandler.TorResolve {
 	var err error
 	c, err := readConfig()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// ** INIT ALL UPSTREAMS HERE **
-	// 1. Local
-	upstreamLocal := resolvehandler.MemoryResolve{
-		Name:    "Manual",
-		Records: c.Manual,
-	}
-	upstreamLocal.Init()
-	defer upstreamLocal.Close()
-	upstreams = append(upstreams, &upstreamLocal)
-
-	// 2. TOR
 	maxTries := 10
 
 	if (c.Tor.Address != "") && (c.Tor.Port != "") {
@@ -70,12 +60,55 @@ func applyConfig() []resolvehandler.ResolveHandler {
 				log.Printf("trial num %v, got error: %v\n", trial, err)
 				upstreamTOR.Close()
 			} else {
-				upstreams = append(upstreams, &upstreamTOR)
-				defer upstreamTOR.Close()
-				break
+				return &upstreamTOR
 			}
 		}
 	}
+	return nil
+}
 
+func getAllBesideTORResolver() map[string][]resolvehandler.ResolveHandler {
+	upstreams := make(map[string][]resolvehandler.ResolveHandler)
+	var err error
+	c, err := readConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// ** INIT ALL UPSTREAMS (BESIDE TOR) HERE **
+	// 1. Local
+	upstreamLocal := resolvehandler.MemoryResolve{
+		Name:    "Manual",
+		Records: c.Manual,
+	}
+	upstreamLocal.Init()
+	defer upstreamLocal.Close()
+	upstreams["local"] = append(upstreams["local"], &upstreamLocal)
+
+	// 2. DoT, hardcoded address for now
+	dts := []resolvehandler.DoTResolve{
+		{
+			ServerHosts: "cloudflare-dns.com",
+			ServerOpts: []dotdns.DoTOption{
+				dotdns.DoTAddresses("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001"),
+			},
+		},
+		{
+			ServerHosts: "dns.google",
+			ServerOpts: []dotdns.DoTOption{
+				dotdns.DoTAddresses("8.8.8.8", "8.8.4.4", "2001:4860:4860::8888", "2001:4860:4860::8844"),
+			},
+		},
+	}
+
+	for _, v := range dts {
+		err := v.Init()
+		if err != nil {
+			fmt.Printf("Error while initializing DOT %v: %v\n", v.ServerHosts, err)
+		} else {
+			defer v.Close()
+			upstreams["fallback"] = append(upstreams["fallback"], &v)
+		}
+	}
 	return upstreams
 }
