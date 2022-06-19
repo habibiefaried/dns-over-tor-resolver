@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
 	"github.com/spf13/viper"
@@ -38,7 +38,7 @@ func applyConfig() []resolvehandler.ResolveHandler {
 	var err error
 	c, err := readConfig()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// ** INIT ALL UPSTREAMS HERE **
@@ -52,18 +52,29 @@ func applyConfig() []resolvehandler.ResolveHandler {
 	upstreams = append(upstreams, &upstreamLocal)
 
 	// 2. TOR
+	maxTries := 10
+
 	if (c.Tor.Address != "") && (c.Tor.Port != "") {
-		upstreamTOR := resolvehandler.TorResolve{
-			OnionDNSServer: c.Tor.Address + ":" + c.Tor.Port,
-			Name:           "TOR Network",
+		trial := 1
+		for {
+			upstreamTOR := resolvehandler.TorResolve{
+				OnionDNSServer: c.Tor.Address + ":" + c.Tor.Port,
+				Name:           "TOR Network",
+			}
+			err = upstreamTOR.Init()
+			if err != nil && trial >= maxTries {
+				upstreamTOR.Close()
+				log.Fatalf("error initializing tor network after %v tries: %v", maxTries, err)
+			} else if err != nil {
+				trial++
+				log.Printf("trial num %v, got error: %v\n", trial, err)
+				upstreamTOR.Close()
+			} else {
+				upstreams = append(upstreams, &upstreamTOR)
+				defer upstreamTOR.Close()
+				break
+			}
 		}
-		err = upstreamTOR.Init()
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			upstreams = append(upstreams, &upstreamTOR)
-		}
-		defer upstreamTOR.Close()
 	}
 
 	return upstreams

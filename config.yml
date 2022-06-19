@@ -1,5 +1,5 @@
 tor:
-  address: pdnsc3ocqx2qj2irfeinfduqckjyjsjvruyfmbt2i5eszy3k2u4gcoqd.onion
+  address: purednsxr4shjkobosrqf7qebwzch3e4ignfr4beq34ngr4nkp2z32id.onion
   port: 53
 manual:
   - dns.testing-only.: 127.0.53.2
