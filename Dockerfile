@@ -2,7 +2,7 @@ FROM golang:1.18.2-alpine3.16 as builder
 
 WORKDIR /app
 COPY . /app/
-RUN go build -o main && chmod +x main
+RUN apk add --update alpine-sdk && go build -o main && chmod +x main
 
 FROM alpine:3.16.0
 

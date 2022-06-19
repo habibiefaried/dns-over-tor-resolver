@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 )
 
 func TestReadConfig(t *testing.T) {
-	c, err := readConfig()
+	c, err := ReadConfig("../")
 	if err != nil {
 		t.Fatal(err)
 	} else {

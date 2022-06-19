@@ -8,12 +8,14 @@ import (
 	"time"
 
 	"github.com/cretz/bine/tor"
+	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	"github.com/miekg/dns"
 )
 
 type TorResolve struct {
 	OnionDNSServer string
 	Name           string
+	DNSCache       []cachehandler.CacheHandler // to support cache
 	intlresolve    *net.Resolver
 	dialCancel     context.CancelFunc
 	conn           net.Conn
@@ -55,11 +57,24 @@ func (tr *TorResolve) Init() error {
 }
 
 func (tr *TorResolve) Resolve(q string) (dns.RR, error) {
-	ip, err := tr.intlresolve.LookupHost(context.Background(), q)
+	ips, err := tr.intlresolve.LookupHost(context.Background(), q)
 	if err != nil {
 		return nil, err
 	} else {
-		return dns.NewRR(fmt.Sprintf("%s A %s", q, ip[0]))
+		for _, ip := range ips {
+			if net.ParseIP(ip) != nil {
+				for _, v := range tr.DNSCache {
+					err := v.Put(q, ip, "TOR")
+					if err != nil {
+						fmt.Printf("Error while putting on cache %v\n", err)
+					}
+				}
+
+				return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip)) // TODO: return multiple value
+			}
+		}
+
+		return nil, fmt.Errorf("all of these IPs not valid for IPv4 format: %v", ips)
 	}
 }
 
@@ -69,6 +84,7 @@ func (tr *TorResolve) GetName() string {
 
 // Close function is a function to close any open connections/processes to upstream
 func (tr *TorResolve) Close() error {
+	fmt.Println("TOR resolver is closing...")
 	err := tr.conn.Close()
 	if err != nil {
 		return err

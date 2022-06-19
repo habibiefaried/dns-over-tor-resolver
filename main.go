@@ -5,16 +5,27 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
+	"github.com/habibiefaried/dns-over-tor-resolver/config"
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
 	"github.com/miekg/dns"
 )
 
 func main() {
 	var torResolve *resolvehandler.TorResolve
-	resolverbesidetor := getAllBesideTORResolver()
+	caches, err := cachehandler.InitCachingSystem()
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	c, err := config.ReadConfig(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resolverbesidetor := resolvehandler.GetAllBesideTORResolver(c, *caches)
 	go func() {
-		torResolve = getTORResolver()
+		torResolve = resolvehandler.GetTORResolver(c, *caches)
 	}()
 
 	// attach request handler func
@@ -23,6 +34,7 @@ func main() {
 		m.SetReply(r)
 		m.Compress = false
 
+	OuterLoop:
 		switch r.Opcode {
 		case dns.OpcodeQuery:
 			for _, q := range m.Question {
@@ -36,7 +48,7 @@ func main() {
 						} else {
 							fmt.Printf("[SUCCESS] got answer from local & cache resolver '%v'\n", u.GetName())
 							m.Answer = append(m.Answer, rr)
-							break
+							break OuterLoop
 						}
 					}
 
@@ -48,7 +60,7 @@ func main() {
 						} else {
 							fmt.Printf("[SUCCESS] got answer from main TOR\n")
 							m.Answer = append(m.Answer, rr)
-							break
+							break OuterLoop
 						}
 					} else {
 						fmt.Println("[WARN] TOR is not initialized yet...")
@@ -61,7 +73,7 @@ func main() {
 						} else {
 							fmt.Printf("[SUCCESS] got answer from fallback resolver '%v'\n", u.GetName())
 							m.Answer = append(m.Answer, rr)
-							break
+							break OuterLoop
 						}
 					}
 				}
@@ -76,7 +88,7 @@ func main() {
 	server := &dns.Server{Addr: ":" + strconv.Itoa(port), Net: "udp"}
 	log.Printf("Listening at %d/udp\n", port)
 
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	defer server.Shutdown()
 	if err != nil {
 		log.Fatalf("Failed to start server: %s\n ", err.Error())

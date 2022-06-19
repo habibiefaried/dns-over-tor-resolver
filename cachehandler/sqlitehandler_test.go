@@ -23,7 +23,7 @@ func TestSQLite(t *testing.T) {
 		email := faker.Email()
 		password := faker.Password()
 
-		err = sq.Put(email, password)
+		err = sq.Put(email, password, "testing")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -41,12 +41,12 @@ func TestSQLite(t *testing.T) {
 		password := faker.Password()
 		password2 := faker.Password()
 
-		err = sq.Put(email, password)
+		err = sq.Put(email, password, "testing")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		err = sq.Put(email, password2)
+		err = sq.Put(email, password2, "testing")
 		if err != nil {
 			t.Fatal(err)
 		}
