@@ -74,15 +74,14 @@ flowchart TD
 4. When the query is got cached
 
 ```
-2022/06/19 04:40:09 Query for itb.ac.id.
-[ERROR]   no answer from local & cache resolver 'SQLite-Cache': sql: no rows in result set
+2022/06/19 05:42:19 Query for itb.ac.id.
+[ERROR]   no answer from local & cache resolver 'Cache': sql: no rows in result set
 [ERROR]   no answer from local & cache resolver 'Manual': query not found
-[WARN] TOR is not initialized yet...
-[SUCCESS] got answer from fallback resolver 'DOT-dns.google'
+[SUCCESS] got answer from main TOR
 
-2022/06/19 04:40:10 Query for itb.ac.id.
-[cache HIT] domain itb.ac.id. is found 167.205.59.96 from DOT-dns.google
-[SUCCESS] got answer from local & cache resolver 'SQLite-Cache'
+2022/06/19 05:42:22 Query for itb.ac.id.
+[cache HIT] domain itb.ac.id. is found 167.205.59.96 from TOR
+[SUCCESS] got answer from local & cache resolver 'Cache'
 ```
 
 5. TOR connection is failing
