@@ -34,14 +34,22 @@ func (dt *DoTResolve) Resolve(q string) (dns.RR, error) {
 
 	for _, v := range dt.DNSCache {
 		for _, ip := range ips {
-			err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
-			if err != nil {
-				fmt.Printf("Error while putting on cache %v\n", err)
+			if net.ParseIP(ip.String()) != nil {
+				err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
+				if err != nil {
+					fmt.Printf("Error while putting on cache %v\n", err)
+				}
 			}
 		}
 	}
 
-	return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ips[0].String())) // TODO: return multiple value
+	for _, ip := range ips {
+		if net.ParseIP(ip.String()) != nil {
+			return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ips[0].String())) // TODO: return multiple value
+		}
+	}
+
+	return nil, fmt.Errorf("all of these IPs not valid for IPv4 format: %v", ips)
 }
 
 func (dt *DoTResolve) GetName() string {
