@@ -18,7 +18,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c, err := config.ReadConfig()
+	c, err := config.ReadConfig(".")
 	if err != nil {
 		log.Fatal(err)
 	}

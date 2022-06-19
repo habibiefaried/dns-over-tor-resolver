@@ -12,10 +12,10 @@ type Config struct {
 	Manual map[string]string `mapstructure:"manual"`
 }
 
-func ReadConfig() (*Config, error) {
+func ReadConfig(path string) (*Config, error) {
 	var config Config
 	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(path)
 
 	if err := viper.ReadInConfig(); err != nil {
 		return nil, err

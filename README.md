@@ -1,17 +1,12 @@
 ## Description
-DNS server that having upstream resolver via TOR network. Only sole purpose to get IP from DNS
+DNS server that having upstream resolver via TOR network. Only sole purpose to get IP from DNS. Packed with ads blocking and DNS query caching.
 
-## Run
+## Program
 
-### Build docker
+### Build & Run docker
 
 ```
 docker build . -t dnsserv
-```
-
-### Run docker
-
-```
 docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv -dit -p 127.0.0.1:53:5353/udp dnsserv
 ```
 
@@ -57,7 +52,7 @@ flowchart TD
 [ERROR]   no answer from fallback resolver 'DOT-dns.google': lookup puredns.rog. on 192.168.1.1:53: no such host
 ```
 
-2. If TOR network is not ready but record is found already
+2. If TOR network is not ready but record is found already (using fallback)
 
 ```
 2022/06/19 02:44:22 Query for itb.ac.id.
@@ -90,6 +85,13 @@ flowchart TD
 [SUCCESS] got answer from local & cache resolver 'SQLite-Cache'
 ```
 
+5. TOR connection is failing
+
+```
+2022/06/19 05:14:09 error dialing remote addr socks connect tcp 127.0.0.1:43093->purednsxr4shjkobosrqf7qebwzch3e4ignfr4beq34ngr4nkp2z32id.onion:53: unknown error TTL expired
+2022/06/19 05:14:09 error dialing remote addr socks connect tcp 127.0.0.1:43093->purednsxr4shjkobosrqf7qebwzch3e4ignfr4beq34ngr4nkp2z32id.onion:53: unknown error TTL expired
+```
+
 ### Feature
 
 1. query via TOR network
@@ -106,6 +108,8 @@ ads.tiktok.com.         3600    IN      A       0.0.0.0
 ;; WHEN: Sun Jun 19 01:09:57 UTC 2022
 ;; MSG SIZE  rcvd: 62
 ```
+
+3. If TOR fails, then fallback to DNS-over-TLS (another secured protocol)
 
 ## NOTICE
 
