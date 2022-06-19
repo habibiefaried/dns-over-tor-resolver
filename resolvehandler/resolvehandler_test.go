@@ -58,8 +58,8 @@ func TestSQLiteResolve(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sqresolv := SqliteCacheResolve{
-		SQLiteHandler: sq,
+	sqresolv := CacheResolve{
+		CacheHandler: sq,
 	}
 
 	rr, err := sqresolv.Resolve("google.com.")
