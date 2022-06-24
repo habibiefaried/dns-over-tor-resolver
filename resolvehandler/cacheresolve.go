@@ -32,7 +32,11 @@ func (s *CacheResolve) Resolve(q string) ([]dns.RR, error) {
 		retRR = append(retRR, d)
 	}
 
-	return retRR, nil
+	if len(retRR) == 0 {
+		return nil, fmt.Errorf("no record found here")
+	} else {
+		return retRR, nil
+	}
 }
 
 func (s *CacheResolve) GetName() string {
