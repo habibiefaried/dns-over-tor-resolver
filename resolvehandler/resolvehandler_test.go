@@ -64,11 +64,16 @@ func TestSQLiteResolve(t *testing.T) {
 	sqresolv := CacheResolve{
 		CacheHandler: sq,
 	}
+	err = sqresolv.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sqresolv.Close()
 
 	rr, err := sqresolv.Resolve("google.com.")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	assert.Equal(t, "google.com.	60	IN	A	8.8.8.8", rr[0].String())
+	assert.Equal(t, "google.com.	10	IN	A	8.8.8.8", rr[0].String())
 }

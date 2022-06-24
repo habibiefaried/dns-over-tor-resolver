@@ -20,6 +20,7 @@ func GetTORResolver(c *config.Config, ch []cachehandler.CacheHandler) *TorResolv
 				OnionDNSServer: c.Tor.Address + ":" + c.Tor.Port,
 				Name:           "TOR Network",
 				DNSCache:       ch,
+				DnsTTL:         c.DnsTTL,
 			}
 			err = upstreamTOR.Init()
 			if err != nil && trial >= maxTries {
@@ -41,9 +42,10 @@ func GetAllBesideTORResolver(c *config.Config, ch []cachehandler.CacheHandler) m
 	upstreams := make(map[string][]ResolveHandler)
 	// ** INIT ALL UPSTREAMS (BESIDE TOR) HERE **
 	// 1. Cache
-	for _, c := range ch {
+	for _, celm := range ch {
 		upstreams["local"] = append(upstreams["local"], &CacheResolve{
-			CacheHandler: c,
+			CacheHandler: celm,
+			DnsTTL:       c.DnsTTL,
 		})
 	}
 
@@ -51,6 +53,7 @@ func GetAllBesideTORResolver(c *config.Config, ch []cachehandler.CacheHandler) m
 	upstreamLocal := MemoryResolve{
 		Name:    "Manual",
 		Records: c.Manual,
+		DnsTTL:  c.DnsTTL,
 	}
 	upstreamLocal.Init()
 	upstreams["local"] = append(upstreams["local"], &upstreamLocal)
@@ -63,6 +66,7 @@ func GetAllBesideTORResolver(c *config.Config, ch []cachehandler.CacheHandler) m
 				dotdns.DoTAddresses("1.1.1.1", "1.0.0.1", "2606:4700:4700::1111", "2606:4700:4700::1001"),
 			},
 			DNSCache: ch,
+			DnsTTL:   c.DnsTTL,
 		},
 		{
 			ServerHosts: "dns.google",
@@ -70,6 +74,7 @@ func GetAllBesideTORResolver(c *config.Config, ch []cachehandler.CacheHandler) m
 				dotdns.DoTAddresses("8.8.8.8", "8.8.4.4", "2001:4860:4860::8888", "2001:4860:4860::8844"),
 			},
 			DNSCache: ch,
+			DnsTTL:   c.DnsTTL,
 		},
 	}
 

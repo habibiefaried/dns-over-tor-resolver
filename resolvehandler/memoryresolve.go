@@ -10,6 +10,7 @@ import (
 type MemoryResolve struct {
 	Records map[string]string
 	Name    string
+	DnsTTL  int
 }
 
 func (m *MemoryResolve) GetName() string {
@@ -17,6 +18,10 @@ func (m *MemoryResolve) GetName() string {
 }
 
 func (m *MemoryResolve) Init() error {
+	if m.DnsTTL == 0 {
+		m.DnsTTL = 10 // default value
+	}
+
 	return nil
 }
 
@@ -24,7 +29,7 @@ func (m *MemoryResolve) Resolve(q string) ([]dns.RR, error) {
 	ret := []dns.RR{}
 
 	if val, ok := m.Records[q]; ok {
-		c, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, val))
+		c, err := dns.NewRR(fmt.Sprintf("%s %v IN A %s", q, m.DnsTTL, val))
 		if err != nil {
 			return nil, fmt.Errorf("not correct IP")
 		}
