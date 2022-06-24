@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"time"
 
 	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	"github.com/miekg/dns"
@@ -39,7 +40,7 @@ func (dt *DoTResolve) Resolve(q string) ([]dns.RR, error) {
 
 			if dt.DNSCache != nil {
 				for _, v := range dt.DNSCache {
-					err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
+					err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts), time.Now().Unix())
 					if err != nil {
 						fmt.Printf("Error while putting on cache %v\n", err)
 					}
@@ -54,7 +55,11 @@ func (dt *DoTResolve) Resolve(q string) ([]dns.RR, error) {
 		}
 	}
 
-	return retRR, nil
+	if len(retRR) == 0 {
+		return nil, fmt.Errorf("no record found here")
+	} else {
+		return retRR, nil
+	}
 }
 
 func (dt *DoTResolve) GetName() string {

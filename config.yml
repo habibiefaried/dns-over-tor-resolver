@@ -5,3 +5,4 @@ manual:
   - dns.testing-only.: 127.0.53.2
   - local.testing.pvt.: 127.0.4.2
   - pure.privatedomain.: 127.1.5.6
+cachettl: 3600

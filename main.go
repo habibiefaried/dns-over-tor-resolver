@@ -5,27 +5,27 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	"github.com/habibiefaried/dns-over-tor-resolver/config"
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
 	"github.com/miekg/dns"
 )
 
 func main() {
-	// note: disable the cache system first as the solution is good enough
-	// caches, err := cachehandler.InitCachingSystem()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	c, err := config.ReadConfig(".")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resolvers := resolvehandler.GetAllBesideTORResolver(c, nil)
+	caches, err := cachehandler.InitCachingSystem(c)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resolvers := resolvehandler.GetAllBesideTORResolver(c, *caches)
 	resolvers["tor"] = nil
 	go func() {
-		resolvers["tor"] = append(resolvers["tor"], resolvehandler.GetTORResolver(c, nil))
+		resolvers["tor"] = append(resolvers["tor"], resolvehandler.GetTORResolver(c, *caches))
 	}()
 	keysInSorted := []string{"local", "tor", "fallback"}
 
