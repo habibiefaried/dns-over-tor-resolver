@@ -84,7 +84,11 @@ func (tr *TorResolve) Resolve(q string) ([]dns.RR, error) {
 			}
 		}
 
-		return ret, nil
+		if len(ret) == 0 {
+			return nil, fmt.Errorf("no record found here")
+		} else {
+			return ret, nil
+		}
 	}
 }
 

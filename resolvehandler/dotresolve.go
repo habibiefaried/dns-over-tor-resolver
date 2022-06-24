@@ -55,7 +55,11 @@ func (dt *DoTResolve) Resolve(q string) ([]dns.RR, error) {
 		}
 	}
 
-	return retRR, nil
+	if len(retRR) == 0 {
+		return nil, fmt.Errorf("no record found here")
+	} else {
+		return retRR, nil
+	}
 }
 
 func (dt *DoTResolve) GetName() string {
