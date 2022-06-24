@@ -12,12 +12,12 @@ import (
 )
 
 func main() {
-	caches, err := cachehandler.InitCachingSystem()
+	c, err := config.ReadConfig(".")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	c, err := config.ReadConfig(".")
+	caches, err := cachehandler.InitCachingSystem(c)
 	if err != nil {
 		log.Fatal(err)
 	}
