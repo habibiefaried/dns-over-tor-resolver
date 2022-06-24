@@ -5,28 +5,29 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	"github.com/habibiefaried/dns-over-tor-resolver/config"
 	"github.com/habibiefaried/dns-over-tor-resolver/resolvehandler"
 	"github.com/miekg/dns"
 )
 
 func main() {
-	var torResolve *resolvehandler.TorResolve
-	caches, err := cachehandler.InitCachingSystem()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// note: disable the cache system first as the solution is good enough
+	// caches, err := cachehandler.InitCachingSystem()
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
 	c, err := config.ReadConfig(".")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resolverbesidetor := resolvehandler.GetAllBesideTORResolver(c, *caches)
+	resolvers := resolvehandler.GetAllBesideTORResolver(c, nil)
+	resolvers["tor"] = nil
 	go func() {
-		torResolve = resolvehandler.GetTORResolver(c, *caches)
+		resolvers["tor"] = append(resolvers["tor"], resolvehandler.GetTORResolver(c, nil))
 	}()
+	keysInSorted := []string{"local", "tor", "fallback"}
 
 	// attach request handler func
 	dns.HandleFunc(".", func(w dns.ResponseWriter, r *dns.Msg) {
@@ -41,39 +42,18 @@ func main() {
 				log.Printf("Query for %s\n", q.Name)
 				switch q.Qtype {
 				case dns.TypeA:
-					for _, u := range resolverbesidetor["local"] {
-						rr, err := u.Resolve(q.Name) // TODO: to support multiple answer
-						if err != nil {
-							fmt.Printf("[ERROR]   no answer from local & cache resolver '%v': %v\n", u.GetName(), err)
-						} else {
-							fmt.Printf("[SUCCESS] got answer from local & cache resolver '%v'\n", u.GetName())
-							m.Answer = append(m.Answer, rr)
-							break OuterLoop
-						}
-					}
-
-					// TOR function later here
-					if torResolve != nil {
-						rr, err := torResolve.Resolve(q.Name)
-						if err != nil {
-							fmt.Printf("[ERROR]   no answer from main TOR: %v\n", err)
-						} else {
-							fmt.Printf("[SUCCESS] got answer from main TOR\n")
-							m.Answer = append(m.Answer, rr)
-							break OuterLoop
-						}
-					} else {
-						fmt.Println("[WARN] TOR is not initialized yet...")
-					}
-
-					for _, u := range resolverbesidetor["fallback"] {
-						rr, err := u.Resolve(q.Name)
-						if err != nil {
-							fmt.Printf("[ERROR]   no answer from fallback resolver '%v': %v\n", u.GetName(), err)
-						} else {
-							fmt.Printf("[SUCCESS] got answer from fallback resolver '%v'\n", u.GetName())
-							m.Answer = append(m.Answer, rr)
-							break OuterLoop
+					for _, sKey := range keysInSorted {
+						if resolvers[sKey] != nil {
+							for _, u := range resolvers[sKey] {
+								rr, err := u.Resolve(q.Name)
+								if err != nil {
+									fmt.Printf("[ERROR]   no answer from resolver '%v': %v\n", u.GetName(), err)
+								} else {
+									fmt.Printf("[SUCCESS] got answer from resolver '%v'\n", u.GetName())
+									m.Answer = append(m.Answer, rr...)
+									break OuterLoop
+								}
+							}
 						}
 					}
 				}

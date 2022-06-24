@@ -10,6 +10,7 @@ WORKDIR /app
 COPY --from=builder /app/main .
 COPY entrypoint.sh /app/entrypoint.sh
 COPY config.yml /app/config.yml 
+COPY torrc /app/torrc
 RUN apk add --no-cache tor
 RUN wget https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts -O /app/hosts
 RUN chmod +x /app/entrypoint.sh

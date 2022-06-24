@@ -15,12 +15,21 @@ func (s *CacheResolve) Init() error {
 	return nil
 }
 
-func (s *CacheResolve) Resolve(q string) (dns.RR, error) {
+func (s *CacheResolve) Resolve(q string) ([]dns.RR, error) {
+	retRR := []dns.RR{}
+
 	ret, err := s.CacheHandler.Get(q)
+	if err != nil {
+		return retRR, err
+	}
+
+	d, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, *ret))
 	if err != nil {
 		return nil, err
 	}
-	return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, *ret))
+
+	retRR = append(retRR, d)
+	return retRR, nil
 }
 
 func (s *CacheResolve) GetName() string {
