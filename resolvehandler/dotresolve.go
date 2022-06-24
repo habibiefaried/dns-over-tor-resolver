@@ -16,6 +16,7 @@ type DoTResolve struct {
 	ServerOpts  []dotdns.DoTOption
 	DNSCache    []cachehandler.CacheHandler // to support cache
 	resolver    *net.Resolver
+	DnsTTL      int
 }
 
 func (dt *DoTResolve) Init() error {
@@ -24,6 +25,10 @@ func (dt *DoTResolve) Init() error {
 	if err != nil {
 		return fmt.Errorf("newDoTResolver %v error = %v", dt.ServerHosts, err)
 	}
+	if dt.DnsTTL == 0 {
+		dt.DnsTTL = 10 // default value
+	}
+
 	return nil
 }
 
@@ -47,7 +52,7 @@ func (dt *DoTResolve) Resolve(q string) ([]dns.RR, error) {
 				}
 			}
 
-			c, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip.String()))
+			c, err := dns.NewRR(fmt.Sprintf("%s %v IN A %s", q, dt.DnsTTL, ip.String()))
 			if err != nil {
 				return nil, fmt.Errorf("got error when generate RR %v", err)
 			}

@@ -9,9 +9,13 @@ import (
 
 type CacheResolve struct {
 	CacheHandler cachehandler.CacheHandler
+	DnsTTL       int
 }
 
 func (s *CacheResolve) Init() error {
+	if s.DnsTTL == 0 {
+		s.DnsTTL = 10 // default value
+	}
 	return nil
 }
 
@@ -24,7 +28,7 @@ func (s *CacheResolve) Resolve(q string) ([]dns.RR, error) {
 	}
 
 	for _, relm := range ret {
-		d, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, relm))
+		d, err := dns.NewRR(fmt.Sprintf("%s %v IN A %s", q, s.DnsTTL, relm))
 		if err != nil {
 			return nil, err
 		}

@@ -19,6 +19,7 @@ type TorResolve struct {
 	intlresolve    *net.Resolver
 	dialCancel     context.CancelFunc
 	conn           net.Conn
+	DnsTTL         int
 }
 
 func (tr *TorResolve) Init() error {
@@ -53,6 +54,10 @@ func (tr *TorResolve) Init() error {
 	}
 	fmt.Println("TOR net resolve success: " + ip[0])
 
+	if tr.DnsTTL == 0 {
+		tr.DnsTTL = 10 // default value
+	}
+
 	return nil
 }
 
@@ -75,7 +80,7 @@ func (tr *TorResolve) Resolve(q string) ([]dns.RR, error) {
 					}
 				}
 
-				c, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip))
+				c, err := dns.NewRR(fmt.Sprintf("%s %v IN A %s", q, tr.DnsTTL, ip))
 				if err != nil {
 					return nil, fmt.Errorf("got error for creating new record: %v", err)
 				}
