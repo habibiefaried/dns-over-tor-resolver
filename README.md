@@ -113,3 +113,7 @@ ads.tiktok.com.         3600    IN      A       0.0.0.0
 ## NOTICE
 
 Only run and use this on local machine or trusted network. as DNS over UDP (which is default option by most machine) is unsecured protocol
+
+## TODO
+
+Only support "A" query right now. In the future we will add more
