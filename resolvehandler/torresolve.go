@@ -23,7 +23,7 @@ type TorResolve struct {
 
 func (tr *TorResolve) Init() error {
 	fmt.Println("Starting and registering onion service, please wait a couple of minutes...")
-	t, err := tor.Start(context.TODO(), &tor.StartConf{DataDir: "data-dir-tcp-to-tor", EnableNetwork: true, DebugWriter: nil})
+	t, err := tor.Start(context.TODO(), &tor.StartConf{EnableNetwork: true, DebugWriter: nil})
 	if err != nil {
 		return err
 	}
@@ -56,25 +56,35 @@ func (tr *TorResolve) Init() error {
 	return nil
 }
 
-func (tr *TorResolve) Resolve(q string) (dns.RR, error) {
+func (tr *TorResolve) Resolve(q string) ([]dns.RR, error) {
+	ret := []dns.RR{}
+
 	ips, err := tr.intlresolve.LookupHost(context.Background(), q)
 	if err != nil {
 		return nil, err
 	} else {
 		for _, ip := range ips {
-			if net.ParseIP(ip) != nil {
-				for _, v := range tr.DNSCache {
-					err := v.Put(q, ip, "TOR")
-					if err != nil {
-						fmt.Printf("Error while putting on cache %v\n", err)
+			if net.ParseIP(ip).To4() != nil {
+
+				if tr.DNSCache != nil {
+					for _, v := range tr.DNSCache {
+						err := v.Put(q, ip, "TOR")
+						if err != nil {
+							fmt.Printf("Error while putting on cache %v\n", err)
+						}
 					}
 				}
 
-				return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip)) // TODO: return multiple value
+				c, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip))
+				if err != nil {
+					return nil, fmt.Errorf("got error for creating new record: %v", err)
+				}
+
+				ret = append(ret, c)
 			}
 		}
 
-		return nil, fmt.Errorf("all of these IPs not valid for IPv4 format: %v", ips)
+		return ret, nil
 	}
 }
 

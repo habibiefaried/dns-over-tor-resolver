@@ -26,26 +26,35 @@ func (dt *DoTResolve) Init() error {
 	return nil
 }
 
-func (dt *DoTResolve) Resolve(q string) (dns.RR, error) {
+func (dt *DoTResolve) Resolve(q string) ([]dns.RR, error) {
+	retRR := []dns.RR{}
+
 	ips, err := dt.resolver.LookupIPAddr(context.TODO(), q)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, ip := range ips {
-		if net.ParseIP(ip.String()) != nil {
-			for _, v := range dt.DNSCache {
-				err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
-				if err != nil {
-					fmt.Printf("Error while putting on cache %v\n", err)
+		if net.ParseIP(ip.String()).To4() != nil {
+
+			if dt.DNSCache != nil {
+				for _, v := range dt.DNSCache {
+					err := v.Put(q, ip.String(), fmt.Sprintf("DOT-%v", dt.ServerHosts))
+					if err != nil {
+						fmt.Printf("Error while putting on cache %v\n", err)
+					}
 				}
 			}
 
-			return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip.String())) // TODO: return multiple value
+			c, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, ip.String()))
+			if err != nil {
+				return nil, fmt.Errorf("got error when generate RR %v", err)
+			}
+			retRR = append(retRR, c)
 		}
 	}
 
-	return nil, fmt.Errorf("all of these IPs not valid for IPv4 format: %v", ips)
+	return retRR, nil
 }
 
 func (dt *DoTResolve) GetName() string {

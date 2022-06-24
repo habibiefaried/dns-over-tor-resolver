@@ -23,10 +23,12 @@ func GetTORResolver(c *config.Config, ch []cachehandler.CacheHandler) *TorResolv
 			}
 			err = upstreamTOR.Init()
 			if err != nil && trial >= maxTries {
-				log.Fatalf("error initializing tor network after %v tries: %v", maxTries, err)
+				log.Printf("error initializing tor network after %v tries: %v\n", maxTries, err)
+				break
 			} else if err != nil {
 				trial++
 				log.Printf("trial num %v, got error: %v\n", trial, err)
+				upstreamTOR.Close()
 			} else {
 				return &upstreamTOR
 			}

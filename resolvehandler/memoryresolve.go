@@ -20,9 +20,17 @@ func (m *MemoryResolve) Init() error {
 	return nil
 }
 
-func (m *MemoryResolve) Resolve(q string) (dns.RR, error) {
+func (m *MemoryResolve) Resolve(q string) ([]dns.RR, error) {
+	ret := []dns.RR{}
+
 	if val, ok := m.Records[q]; ok {
-		return dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, val))
+		c, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, val))
+		if err != nil {
+			return nil, fmt.Errorf("not correct IP")
+		}
+
+		ret = append(ret, c)
+		return ret, nil
 	} else {
 		return nil, fmt.Errorf("query not found")
 	}
