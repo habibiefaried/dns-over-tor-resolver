@@ -50,10 +50,8 @@ func main() {
 									fmt.Printf("[ERROR]   no answer from resolver '%v': %v\n", u.GetName(), err)
 								} else {
 									fmt.Printf("[SUCCESS] got answer from resolver '%v'\n", u.GetName())
-									for _, relm := range rr {
-										m.Answer = append(m.Answer, relm)
-										break OuterLoop
-									}
+									m.Answer = append(m.Answer, rr...)
+									break OuterLoop
 								}
 							}
 						}
