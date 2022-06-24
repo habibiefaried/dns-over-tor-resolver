@@ -23,12 +23,15 @@ func (s *CacheResolve) Resolve(q string) ([]dns.RR, error) {
 		return retRR, err
 	}
 
-	d, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, *ret))
-	if err != nil {
-		return nil, err
+	for _, relm := range ret {
+		d, err := dns.NewRR(fmt.Sprintf("%s 60 IN A %s", q, relm))
+		if err != nil {
+			return nil, err
+		}
+
+		retRR = append(retRR, d)
 	}
 
-	retRR = append(retRR, d)
 	return retRR, nil
 }
 

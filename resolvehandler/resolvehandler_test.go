@@ -2,9 +2,11 @@ package resolvehandler
 
 import (
 	"testing"
+	"time"
 
 	"github.com/habibiefaried/dns-over-tor-resolver/cachehandler"
 	dotdns "github.com/ncruces/go-dns"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDOT(t *testing.T) {
@@ -54,7 +56,7 @@ func TestSQLiteResolve(t *testing.T) {
 	}
 	defer sq.Close()
 
-	err = sq.Put("google.com.", "8.8.8.8", "testing")
+	err = sq.Put("google.com.", "8.8.8.8", "testing", time.Now().Unix())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,5 +70,5 @@ func TestSQLiteResolve(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Log(rr)
+	assert.Equal(t, "google.com.	60	IN	A	8.8.8.8", rr[0].String())
 }

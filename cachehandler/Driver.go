@@ -5,7 +5,8 @@ func InitCachingSystem() (*[]CacheHandler, error) {
 	ret := []CacheHandler{}
 
 	sq := &SqliteHandler{
-		FileName: "dnscache.sqlite",
+		FileName:          "dnscache.sqlite",
+		ExpireAgeinSecond: 3600,
 	}
 	err := sq.Init()
 	if err != nil {
