@@ -7,13 +7,13 @@ DNS server that having upstream resolver via TOR network. Only sole purpose to g
 
 ```
 docker build . -t dnsserv
-docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv -dit -p 127.0.0.1:53:5353/udp dnsserv
+docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv --restart=always -dit -p 127.0.0.1:53:5353/udp dnsserv
 ```
 
 Or just use generated one
 
 ```
-docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv -dit -p 127.0.0.1:53:5353/udp habibiefaried/dns-over-tor-resolver
+docker rm -f dnsserv 2>/dev/null && docker run --name dnsserv --restart=always -dit -p 127.0.0.1:53:5353/udp habibiefaried/dns-over-tor-resolver
 ```
 
 You can create your own config, put as a file, mount as volume to /app/config.yml. Default config is, what we have provided in docker image
