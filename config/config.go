@@ -10,7 +10,7 @@ type TorConfig struct {
 type Config struct {
 	Tor      TorConfig         `mapstructure:"tor"`
 	Manual   map[string]string `mapstructure:"manual"`
-	CacheTTL int               `mapstructure:cachettl`
+	CacheTTL int               `mapstructure:"cachettl"`
 }
 
 func ReadConfig(path string) (*Config, error) {
